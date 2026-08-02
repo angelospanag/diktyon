@@ -1,0 +1,19 @@
+# environment
+api/.env
+*.env.local
+
+# build output
+bin/
+
+# frontend
+frontend/node_modules/
+frontend/dist/
+
+# mise local overrides (machine-specific tool versions, env)
+.mise.local.toml
+
+# macOS
+.DS_Store
+
+# Claude Code
+.claude/

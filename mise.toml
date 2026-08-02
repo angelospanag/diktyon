@@ -1,0 +1,61 @@
+# Root mise.toml — cross-project aggregates and Podman tasks only.
+# Single-service tasks live in api/mise.toml and ui/mise.toml.
+
+# ── Install ───────────────────────────────────────────────────────────────────
+
+[tasks.install]
+description = "Install all tools"
+run = [
+  "mise -C {{config_root}}/api install",
+  "mise -C {{config_root}}/ui install",
+]
+
+# ── Format ────────────────────────────────────────────────────────────────────
+
+[tasks.fmt]
+description = "Format all code (Go + TypeScript)"
+run = [
+  "mise -C {{config_root}}/api run fmt",
+  "mise -C {{config_root}}/ui run fmt",
+]
+
+# ── Lint ──────────────────────────────────────────────────────────────────────
+
+[tasks.lint]
+description = "Lint all code (Go + TypeScript)"
+run = [
+  "mise -C {{config_root}}/api run lint",
+  "mise -C {{config_root}}/ui run lint",
+]
+
+# ── Dependencies ──────────────────────────────────────────────────────────────
+
+[tasks.deps]
+description = "Update all dependencies (Go + Bun)"
+run = [
+  "mise -C {{config_root}}/api run deps",
+  "mise -C {{config_root}}/ui run deps",
+]
+
+# ── Generate ──────────────────────────────────────────────────────────────────
+
+[tasks.generate]
+description = "Regenerate OpenAPI schema then TypeScript client"
+run = [
+  "mise -C {{config_root}}/api run schema",
+  "mise -C {{config_root}}/ui run generate",
+]
+
+# ── Podman Compose ────────────────────────────────────────────────────────────
+
+[tasks."compose:up"]
+description = "Build and start all services in the background"
+run = "podman compose up --build -d"
+
+[tasks."compose:down"]
+description = "Stop and remove containers"
+run = "podman compose down"
+
+[tasks."compose:logs"]
+description = "Follow logs for all services"
+run = "podman compose logs -f"

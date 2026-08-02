@@ -1,0 +1,51 @@
+[tools]
+go = "1.26.5"
+golangci-lint = "2.12.2"
+
+[tasks.dev]
+description = "Start the API server — loads api/.env via godotenv"
+run = "go run ./cmd/api"
+
+[tasks.build]
+description = "Compile a static binary to ../bin/diktyon"
+run = "CGO_ENABLED=0 go build -ldflags='-s -w' -trimpath -o bin/diktyon ./cmd/api"
+
+[tasks.test]
+description = "Run Go tests with race detector"
+run = "go test ./... -race -count=1"
+
+[tasks."test:watch"]
+description = "Run Go tests verbosely"
+run = "go test ./... -race -count=1 -v"
+
+[tasks."test:cover"]
+description = "Run Go tests and open an HTML coverage report"
+run = "go test ./... -race -count=1 -coverprofile=coverage.out && go tool cover -html=coverage.out"
+
+[tasks.lint]
+description = "Run golangci-lint"
+run = "golangci-lint run ./..."
+
+[tasks.fmt]
+description = "Format Go code with golangci-lint formatters"
+run = "golangci-lint fmt ./..."
+
+[tasks.vuln]
+description = "Check for known vulnerabilities in dependencies"
+run = "go tool govulncheck ./..."
+
+[tasks.tidy]
+description = "Tidy Go module dependencies"
+run = "go mod tidy"
+
+[tasks.schema]
+description = "Generate OpenAPI spec to openapi.yaml"
+run = "go run ./cmd/api openapi > openapi.yaml"
+
+[tasks.deps]
+description = "Update Go module dependencies and go.mod tool dependencies"
+run = """
+go get -u ./...
+go get -u tool
+go mod tidy
+"""

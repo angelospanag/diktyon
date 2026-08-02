@@ -1,0 +1,38 @@
+[tools]
+bun = "1.3.14"
+
+[tasks.install]
+description = "Install dependencies"
+run = "bun install"
+
+[tasks.dev]
+description = "Start the Next.js dev server (http://localhost:3000)"
+run = "bun run dev"
+
+[tasks.build]
+description = "Production build"
+run = "bun run build"
+
+[tasks.start]
+description = "Serve the production build"
+run = "bun run start"
+
+[tasks.typecheck]
+description = "TypeScript type check"
+run = "bun run typecheck"
+
+[tasks.fmt]
+description = "Format code with Biome"
+run = "bun run format"
+
+[tasks.lint]
+description = "Biome check"
+run = "bun run lint"
+
+[tasks.generate]
+description = "Generate TypeScript client from ../api/openapi.yaml"
+run = "bun run generate"
+
+[tasks.deps]
+description = "Update dependencies within package.json version ranges"
+run = "bun update"

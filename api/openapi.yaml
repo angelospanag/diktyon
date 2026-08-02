@@ -1,0 +1,441 @@
+components:
+  schemas:
+    Edge:
+      additionalProperties: false
+      properties:
+        kind:
+          description: "Relationship type: officer_of or psc_of"
+          examples:
+            - officer_of
+          type: string
+        source:
+          description: Source node ID
+          examples:
+            - company:12345678
+          type: string
+        target:
+          description: Target node ID
+          examples:
+            - officer:AbC1dEfGhIjKlMnOpQrStUvW
+          type: string
+      required:
+        - source
+        - target
+        - kind
+      type: object
+    ErrorDetail:
+      additionalProperties: false
+      properties:
+        location:
+          description: Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id'
+          type: string
+        message:
+          description: Error message text
+          type: string
+        value:
+          description: The value at the given location
+      type: object
+    ErrorModel:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ErrorModel.json
+          format: uri
+          readOnly: true
+          type: string
+        detail:
+          description: A human-readable explanation specific to this occurrence of the problem.
+          examples:
+            - Property foo is required but is missing.
+          type: string
+        errors:
+          description: Optional list of individual error details
+          items:
+            $ref: "#/components/schemas/ErrorDetail"
+          type:
+            - array
+            - "null"
+        instance:
+          description: A URI reference that identifies the specific occurrence of the problem.
+          examples:
+            - https://example.com/error-log/abc123
+          format: uri
+          type: string
+        status:
+          description: HTTP status code
+          examples:
+            - 400
+          format: int64
+          type: integer
+        title:
+          description: A short, human-readable summary of the problem type. This value should not change between occurrences of the error.
+          examples:
+            - Bad Request
+          type: string
+        type:
+          default: about:blank
+          description: A URI reference to human-readable documentation for the error.
+          examples:
+            - https://example.com/errors/example
+          format: uri
+          type: string
+      type: object
+    Node:
+      additionalProperties: false
+      properties:
+        id:
+          description: Stable node identifier, e.g. company:{number}, officer:{id}, psc:{name_slug}
+          examples:
+            - company:12345678
+          type: string
+        label:
+          description: Display name for the node
+          examples:
+            - EXAMPLE LTD
+          type: string
+        meta:
+          $ref: "#/components/schemas/NodeMeta"
+          description: Type-specific metadata and visual hints for the Polaroid card renderer
+        type:
+          description: "Node type: company, officer, or psc"
+          examples:
+            - company
+          type: string
+      required:
+        - id
+        - label
+        - type
+        - meta
+      type: object
+    NodeMeta:
+      additionalProperties: false
+      properties:
+        accounts_overdue:
+          description: True if statutory accounts are overdue — root company node only
+          examples:
+            - false
+          type: boolean
+        address:
+          description: Registered office address snippet — company nodes only
+          examples:
+            - 1 Example Street, London, EC1A 1BB
+          type: string
+        appointed_on:
+          description: Appointment start date, ISO 8601 — officer and PSC nodes
+          examples:
+            - "2015-03-17"
+          type: string
+        ceased_on:
+          description: Date the PSC ceased, ISO 8601, if ceased — PSC nodes only
+          examples:
+            - "2021-01-01"
+          type: string
+        company_number:
+          description: Companies House number (UK) or GEMI number (GR) — company nodes only
+          examples:
+            - "12345678"
+          type: string
+        company_type:
+          description: Legal form, e.g. ltd, plc — company nodes only
+          examples:
+            - ltd
+          type: string
+        confirmation_statement_overdue:
+          description: True if the confirmation statement is overdue — root company node only
+          examples:
+            - false
+          type: boolean
+        expanded:
+          description: True if this node's connections have already been fetched and rendered
+          examples:
+            - false
+          type: boolean
+        has_charges:
+          description: True if the company has registered charges — root company node only
+          examples:
+            - true
+          type: boolean
+        has_insolvency_history:
+          description: True if the company has insolvency history — root company node only
+          examples:
+            - false
+          type: boolean
+        incorporation_date:
+          description: Date of incorporation, ISO 8601 — company nodes only
+          examples:
+            - "2015-03-17"
+          type: string
+        nationality:
+          description: Officer nationality — officer nodes only
+          examples:
+            - British
+          type: string
+        natures_of_control:
+          description: Nature(s) of control held — PSC nodes only
+          examples:
+            - - ownership-of-shares-25-to-50-percent
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        notified_on:
+          description: Date the PSC was notified, ISO 8601 — PSC nodes only
+          examples:
+            - "2016-04-06"
+          type: string
+        occupation:
+          description: Officer occupation — officer nodes only
+          examples:
+            - Company Director
+          type: string
+        officer_id:
+          description: Officer identifier — officer nodes only
+          examples:
+            - AbC1dEfGhIjKlMnOpQrStUvW
+          type: string
+        registry_url:
+          description: Deep-link to the entity on its source registry site, where available
+          examples:
+            - https://find-and-update.company-information.service.gov.uk/company/12345678
+          type: string
+        resigned_on:
+          description: Resignation date, ISO 8601, if resigned — officer nodes only
+          examples:
+            - "2020-06-01"
+          type: string
+        role:
+          description: Officer role, e.g. director, secretary — officer nodes only
+          examples:
+            - director
+          type: string
+        sic_codes:
+          description: SIC classification codes — company nodes only
+          examples:
+            - - "62020"
+              - "64209"
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        status:
+          description: Company status, e.g. active, dissolved — company nodes only
+          examples:
+            - active
+          type: string
+      required:
+        - expanded
+      type: object
+    Response:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/Response.json
+          format: uri
+          readOnly: true
+          type: string
+        edges:
+          description: Directed relationships between nodes
+          items:
+            $ref: "#/components/schemas/Edge"
+          type:
+            - array
+            - "null"
+        nodes:
+          description: "Graph nodes: companies, officers, and PSCs"
+          items:
+            $ref: "#/components/schemas/Node"
+          type:
+            - array
+            - "null"
+      required:
+        - nodes
+        - edges
+      type: object
+    SearchResult:
+      additionalProperties: false
+      properties:
+        address_snippet:
+          description: Short registered address snippet
+          examples:
+            - 1 Example Street, London
+          type: string
+        company_number:
+          description: Company identifier (CH number for UK, GEMI number for GR)
+          examples:
+            - "12345678"
+          type: string
+        date_of_creation:
+          description: Date of incorporation, ISO 8601
+          examples:
+            - "2015-03-17"
+          type: string
+        name:
+          description: Registered company name
+          examples:
+            - EXAMPLE LTD
+          type: string
+        status:
+          description: Company status, e.g. active, dissolved
+          examples:
+            - active
+          type: string
+        type:
+          description: Legal form, e.g. ltd, plc
+          examples:
+            - ltd
+          type: string
+      required:
+        - company_number
+        - name
+        - address_snippet
+        - status
+        - type
+      type: object
+info:
+  description: Multi-jurisdiction company investigation API
+  title: Diktyon API
+  version: 1.0.0
+openapi: 3.1.0
+paths:
+  /api/company/{company_number}/graph:
+    get:
+      description: Returns the company plus all its officers and PSCs (active and resigned/ceased) as a node/edge list. Add ?depth=2 to also expand each active officer's other current appointments.
+      operationId: get-company-graph
+      parameters:
+        - description: Company identifier (CH number for UK, GEMI number for GR)
+          in: path
+          name: company_number
+          required: true
+          schema:
+            description: Company identifier (CH number for UK, GEMI number for GR)
+            examples:
+              - "12345678"
+            type: string
+        - description: "Graph expansion depth: 1=direct connections (default), 2=connections of connections"
+          explode: false
+          in: query
+          name: depth
+          schema:
+            description: "Graph expansion depth: 1=direct connections (default), 2=connections of connections"
+            examples:
+              - 1
+            format: int64
+            type: integer
+        - description: "Country code: uk (default), gr"
+          explode: false
+          in: query
+          name: country
+          schema:
+            description: "Country code: uk (default), gr"
+            examples:
+              - uk
+            maxLength: 10
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Corporate network graph for a company
+      tags:
+        - graph
+  /api/officer/{officer_id}/graph:
+    get:
+      description: Returns the officer plus all companies they currently sit on the board of.
+      operationId: get-officer-graph
+      parameters:
+        - description: Officer identifier
+          in: path
+          name: officer_id
+          required: true
+          schema:
+            description: Officer identifier
+            examples:
+              - AbC1dEfGhIjKlMnOpQrStUvW
+            type: string
+        - description: "Country code: uk (default), gr"
+          explode: false
+          in: query
+          name: country
+          schema:
+            description: "Country code: uk (default), gr"
+            examples:
+              - uk
+            maxLength: 10
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Appointments graph for an officer
+      tags:
+        - graph
+  /api/search:
+    get:
+      description: Searches the requested country's company registry by name or number and returns matching companies for display as search result cards.
+      operationId: search-companies
+      parameters:
+        - description: Company name or number to search for
+          explode: false
+          in: query
+          name: q
+          schema:
+            description: Company name or number to search for
+            examples:
+              - acme
+            maxLength: 100
+            minLength: 2
+            type: string
+        - description: "Country code: uk (default), gr"
+          explode: false
+          in: query
+          name: country
+          schema:
+            description: "Country code: uk (default), gr"
+            examples:
+              - uk
+            maxLength: 10
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/SearchResult"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Search companies by name
+      tags:
+        - search

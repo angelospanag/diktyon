@@ -1,0 +1,43 @@
+services:
+
+  backend:
+    build:
+      context: ./api
+      dockerfile: Containerfile
+    restart: unless-stopped
+    env_file: ./api/.env     # loads COMPANIES_HOUSE_API_KEY and other settings
+    environment:
+      REDIS_URL: redis://redis:6379   # overrides any REDIS_URL in .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+    # distroless has no shell tools, so no in-container healthcheck.
+    # The /health endpoint is available for external load balancers.
+
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Containerfile
+    restart: unless-stopped
+    environment:
+      API_URL: http://backend:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  redis:
+    image: redis:8.10.0-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  redis_data:
