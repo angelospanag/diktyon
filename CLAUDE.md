@@ -31,12 +31,17 @@ For local development, run each service separately — see their CLAUDE.md files
 
 ## CI (GitHub Actions)
 
-Five jobs on push/PR to `main`:
+Seven jobs on push/PR to `main`:
 - **lint** — golangci-lint on the Go code
 - **lint-frontend** — Biome check on the TypeScript code
+- **vuln** — `govulncheck ./...` on the Go dependencies
+- **vuln-frontend** — `bun audit` on the Bun dependencies
 - **test** — `go test ./...` with a live Redis service container
 - **typecheck-frontend** — `tsc --noEmit`
-- **build** — Podman image builds (depends on the four above)
+- **build** — Podman image builds (depends on the six above)
+
+`bun audit` fails on any advisory. Fix transitive ones by pinning a patched
+version in `ui/package.json`'s `overrides`.
 
 Task runner is `mise` — see `mise.toml` for task definitions.
 

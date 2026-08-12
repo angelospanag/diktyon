@@ -29,6 +29,10 @@ run = "bun run format"
 description = "Biome check"
 run = "bun run lint"
 
+[tasks.vuln]
+description = "Check for known vulnerabilities in dependencies"
+run = "bun audit"
+
 [tasks.generate]
 description = "Generate TypeScript client from ../api/openapi.yaml"
 run = "bun run generate"

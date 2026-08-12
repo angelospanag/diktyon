@@ -28,6 +28,15 @@ run = [
   "mise -C {{config_root}}/ui run lint",
 ]
 
+# ── Vulnerabilities ───────────────────────────────────────────────────────────
+
+[tasks.vuln]
+description = "Audit all dependencies for known vulnerabilities (Go + Bun)"
+run = [
+  "mise -C {{config_root}}/api run vuln",
+  "mise -C {{config_root}}/ui run vuln",
+]
+
 # ── Dependencies ──────────────────────────────────────────────────────────────
 
 [tasks.deps]
