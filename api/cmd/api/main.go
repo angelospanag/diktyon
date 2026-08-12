@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/andybalholm/brotli"
 	"github.com/angelospanag/diktyon/internal/api"
 	"github.com/angelospanag/diktyon/internal/cache"
 	"github.com/angelospanag/diktyon/internal/config"
@@ -16,6 +18,8 @@ import (
 	"github.com/angelospanag/diktyon/internal/providers/uk"
 	"github.com/angelospanag/diktyon/internal/registry"
 	"github.com/danielgtaylor/huma/v2/humacli"
+	"github.com/go-chi/chi/v5"
+	chimw "github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 )
@@ -66,9 +70,19 @@ func main() {
 
 		router, _ := api.NewRouter(reg, cacheClient)
 
+		// chi ships gzip and deflate only; brotli is added here and takes precedence.
+		compressor := chimw.NewCompressor(6)
+		compressor.SetEncoder("br", func(w io.Writer, level int) io.Writer {
+			return brotli.NewWriterLevel(w, level)
+		})
+
+		// Chain applies outermost first, so Recoverer also catches panics raised inside the
+		// compressor — otherwise a panic mid-write leaves a truncated compressed body.
+		handler := chi.Chain(chimw.Recoverer, compressor.Handler).Handler(router)
+
 		srv := &http.Server{
 			Addr:         fmt.Sprintf(":%d", cfg.Port),
-			Handler:      router,
+			Handler:      handler,
 			ReadTimeout:  15 * time.Second,
 			WriteTimeout: 30 * time.Second,
 			IdleTimeout:  60 * time.Second,

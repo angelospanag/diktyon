@@ -15,7 +15,6 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/go-chi/chi/v5"
-	chimw "github.com/go-chi/chi/v5/middleware"
 )
 
 type SearchInput struct {
@@ -59,8 +58,6 @@ type OfficerGraphOutput struct {
 // (for OpenAPI schema generation — see the openapi subcommand in cmd/api/main.go).
 func NewRouter(reg *registry.Registry, c cache.Cache) (http.Handler, huma.API) {
 	r := chi.NewRouter()
-
-	r.Use(chimw.Recoverer)
 
 	// Liveness probe — outside Huma so it never appears in the OpenAPI spec.
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
