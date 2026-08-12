@@ -61,8 +61,6 @@ func NewRouter(reg *registry.Registry, c cache.Cache) (http.Handler, huma.API) {
 	r := chi.NewRouter()
 
 	r.Use(chimw.Recoverer)
-	r.Use(middleware.RequestID)
-	r.Use(middleware.Logger)
 
 	// Liveness probe — outside Huma so it never appears in the OpenAPI spec.
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -75,6 +73,7 @@ func NewRouter(reg *registry.Registry, c cache.Cache) (http.Handler, huma.API) {
 	cfg.Info.Description = "Multi-jurisdiction company investigation API"
 
 	api := humachi.New(r, cfg)
+	api.UseMiddleware(middleware.LoggingMiddleware)
 
 	huma.Register(api, huma.Operation{
 		OperationID: "search-companies",
@@ -84,6 +83,7 @@ func NewRouter(reg *registry.Registry, c cache.Cache) (http.Handler, huma.API) {
 		Description: "Searches the requested country's company registry by name or number and returns matching companies for display as search result cards.",
 		Tags:        []string{"search"},
 	}, func(ctx context.Context, input *SearchInput) (*SearchOutput, error) {
+		logger := ctx.Value("logger").(*slog.Logger)
 		country := countryOrDefault(input.Country)
 
 		provider, err := reg.Get(country)
@@ -100,7 +100,7 @@ func NewRouter(reg *registry.Registry, c cache.Cache) (http.Handler, huma.API) {
 
 		items, err := provider.SearchCompanies(ctx, input.Q)
 		if err != nil {
-			slog.ErrorContext(ctx, "upstream search failed", "country", country, "error", err)
+			logger.ErrorContext(ctx, "upstream search failed", "country", country, "error", err)
 			return nil, huma.Error502BadGateway("upstream request failed")
 		}
 
@@ -130,6 +130,7 @@ func NewRouter(reg *registry.Registry, c cache.Cache) (http.Handler, huma.API) {
 		Description: "Returns the company plus all its officers and PSCs (active and resigned/ceased) as a node/edge list. Add ?depth=2 to also expand each active officer's other current appointments.",
 		Tags:        []string{"graph"},
 	}, func(ctx context.Context, input *CompanyGraphInput) (*CompanyGraphOutput, error) {
+		logger := ctx.Value("logger").(*slog.Logger)
 		country := countryOrDefault(input.Country)
 
 		provider, err := reg.Get(country)
@@ -159,7 +160,7 @@ func NewRouter(reg *registry.Registry, c cache.Cache) (http.Handler, huma.API) {
 			if errors.Is(err, registry.ErrNotFound) {
 				return nil, huma.Error404NotFound("company not found")
 			}
-			slog.ErrorContext(
+			logger.ErrorContext(
 				ctx,
 				"upstream company graph failed",
 				"country",
@@ -185,6 +186,7 @@ func NewRouter(reg *registry.Registry, c cache.Cache) (http.Handler, huma.API) {
 		Description: "Returns the officer plus all companies they currently sit on the board of.",
 		Tags:        []string{"graph"},
 	}, func(ctx context.Context, input *OfficerGraphInput) (*OfficerGraphOutput, error) {
+		logger := ctx.Value("logger").(*slog.Logger)
 		country := countryOrDefault(input.Country)
 
 		provider, err := reg.Get(country)
@@ -209,7 +211,7 @@ func NewRouter(reg *registry.Registry, c cache.Cache) (http.Handler, huma.API) {
 					"officer graph not supported for this country",
 				)
 			}
-			slog.ErrorContext(
+			logger.ErrorContext(
 				ctx,
 				"upstream officer graph failed",
 				"country",

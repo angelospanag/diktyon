@@ -1,57 +1,46 @@
+// Package middleware holds the Huma middleware the API runs on every operation.
 package middleware
 
 import (
-	"context"
 	"log/slog"
-	"net/http"
 	"time"
 
+	"github.com/danielgtaylor/huma/v2"
 	"github.com/google/uuid"
 )
 
-type contextKey string
+// LoggingMiddleware logs one line per request and attaches a logger carrying the request id to the
+// context, which handlers read with ctx.Value("logger").(*slog.Logger).
+func LoggingMiddleware(ctx huma.Context, next func(huma.Context)) {
+	start := time.Now()
 
-const requestIDKey contextKey = "request_id"
+	logger := slog.Default().With(
+		slog.String("request_id", uuid.Must(uuid.NewV7()).String()),
+	)
+	ctx = huma.WithValue(ctx, "logger", logger)
 
-// RequestID generates a UUID v7 for each request, stores it in the context,
-// and sets it as the X-Request-ID response header.
-func RequestID(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, _ := uuid.NewV7()
-		w.Header().Set("X-Request-ID", id.String())
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), requestIDKey, id.String())))
-	})
-}
+	next(ctx)
 
-// RequestIDFromContext returns the request ID stored by the RequestID middleware.
-func RequestIDFromContext(ctx context.Context) string {
-	id, _ := ctx.Value(requestIDKey).(string)
-	return id
-}
+	// nil, not "", so a request without a query string logs null rather than an empty field.
+	var query any
+	if raw := ctx.URL().RawQuery; raw != "" {
+		query = raw
+	}
 
-// Logger is chi-compatible middleware that emits a structured slog line per request.
-// Must be chained after RequestID to include the request ID in log lines.
-func Logger(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		ww := &wrappedWriter{ResponseWriter: w, status: http.StatusOK}
-		next.ServeHTTP(ww, r)
-		slog.Info("http",
-			"request_id", RequestIDFromContext(r.Context()),
-			"method", r.Method,
-			"path", r.URL.Path,
-			"status", ww.status,
-			"ms", time.Since(start).Milliseconds(),
-		)
-	})
-}
+	attrs := []slog.Attr{
+		slog.String("method", ctx.Method()),
+		slog.String("path", ctx.URL().Path),
+		slog.Any("query", query),
+		slog.Int("status", ctx.Status()),
+		slog.Float64("duration_s", time.Since(start).Seconds()),
+	}
 
-type wrappedWriter struct {
-	http.ResponseWriter
-	status int
-}
-
-func (w *wrappedWriter) WriteHeader(code int) {
-	w.status = code
-	w.ResponseWriter.WriteHeader(code)
+	// One event name: the message is a grouping key, so the outcome belongs in level and
+	// status. Only 5xx raises the level — every 4xx here is the API working correctly, and
+	// the scraper traffic would make Warn unreadable.
+	level := slog.LevelInfo
+	if ctx.Status() >= 500 {
+		level = slog.LevelError
+	}
+	logger.LogAttrs(ctx.Context(), level, "http_request", attrs...)
 }
