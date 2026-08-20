@@ -6,7 +6,7 @@ require (
 	github.com/andybalholm/brotli v1.2.2
 	github.com/caarlos0/env/v11 v11.4.1
 	github.com/danielgtaylor/huma/v2 v2.39.1
-	github.com/go-chi/chi/v5 v5.3.1
+	github.com/go-chi/chi/v5 v5.3.2
 	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.22.0
 	github.com/spf13/cobra v1.10.2
@@ -21,7 +21,7 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/mod v0.40.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/telemetry v0.0.0-20260819180204-f79da969f323 // indirect
+	golang.org/x/telemetry v0.0.0-20260820143203-7221e139e8d6 // indirect
 	golang.org/x/tools v0.49.0 // indirect
 	golang.org/x/vuln v1.7.0 // indirect
 )
