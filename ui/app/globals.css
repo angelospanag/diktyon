@@ -77,6 +77,13 @@ body,
   .cork-board {
     overflow: visible;
   }
+
+  /* The legend collapses on mobile — always show full content in the
+     print/PDF export regardless of that on-screen collapsed state. */
+  [data-legend-body] {
+    /* biome-ignore lint/complexity/noImportantStyles: must beat the inline display:none the collapse toggle sets */
+    display: block !important;
+  }
 }
 
 /* ── Card reveal animation ─────────────────────────────────────────────────── */

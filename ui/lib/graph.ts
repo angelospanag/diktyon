@@ -1,4 +1,21 @@
+import { useEffect, useState } from "react";
 import type { Node as GraphNode, NodeMeta } from "@/client/types.gen";
+
+// Tracks whether the viewport is at/under `breakpoint` (default: Tailwind's
+// `sm`). Starts `false` so server and first client render agree, then syncs
+// to the real value post-mount — used to default floating panels (legend,
+// roster) to collapsed on small screens without a hydration mismatch.
+export function useIsMobile(breakpoint = 640): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
+    setIsMobile(mq.matches);
+    const onChange = () => setIsMobile(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [breakpoint]);
+  return isMobile;
+}
 
 // Deterministic per-node Polaroid tilt, derived purely from the node id (a
 // djb2-style string hash) so the same node always tilts the same way across

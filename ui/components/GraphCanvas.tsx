@@ -141,7 +141,7 @@ function PolaroidCard({
   dimmed: boolean;
   onClick: (n: GraphNode) => void;
   onExpand: (n: GraphNode) => void;
-  onDragStart: (id: string, e: React.MouseEvent) => void;
+  onDragStart: (id: string, e: React.PointerEvent) => void;
   onHover: (id: string | null) => void;
 }) {
   const gn = node.graphNode;
@@ -153,8 +153,10 @@ function PolaroidCard({
     // biome-ignore lint/a11y/noStaticElementInteractions: draggable graph node
     // biome-ignore lint/a11y/useKeyWithClickEvents: drag interaction, not a simple click target
     <div
-      onMouseDown={(e) => {
+      onPointerDown={(e) => {
+        if (e.pointerType === "mouse" && e.button !== 0) return;
         e.stopPropagation();
+        e.currentTarget.setPointerCapture(e.pointerId);
         onDragStart(node.id, e);
       }}
       onClick={(e) => {
@@ -170,6 +172,7 @@ function PolaroidCard({
         transform: `translate(-50%, -50%) rotate(${tilt}deg)`,
         cursor: "grab",
         userSelect: "none",
+        touchAction: "none",
         opacity: dimmed ? 0.15 : historical ? 0.72 : 1,
         transition: "opacity 0.18s ease",
       }}
@@ -317,7 +320,7 @@ function PolaroidCard({
             (gn.type === "officer" && !!gn.meta.officer_id)) && (
             <button
               type="button"
-              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
                 onExpand(gn);
@@ -487,6 +490,14 @@ export const GraphCanvas = forwardRef<GraphCanvasHandle, Props>(
     const dragNodeOrigin = useRef({ x: 0, y: 0 });
     const dragMouseOrigin = useRef({ x: 0, y: 0 });
 
+    // Active background pointers (touch/pen/mouse), keyed by pointerId — used
+    // for single-pointer pan and two-pointer pinch-zoom.
+    const pointers = useRef(new Map<number, { x: number; y: number }>());
+    const pinchStartDist = useRef(0);
+    const pinchStartZoom = useRef(1);
+    const pinchStartPan = useRef({ x: 0, y: 0 });
+    const pinchStartMid = useRef({ x: 0, y: 0 });
+
     // ── Fit ──────────────────────────────────────────────────────────────────
 
     const fitToNodes = useCallback((n: SimNode[]) => {
@@ -647,19 +658,37 @@ export const GraphCanvas = forwardRef<GraphCanvasHandle, Props>(
       };
     }, []);
 
-    // ── Canvas pan ────────────────────────────────────────────────────────────
+    // ── Canvas pan + pinch-zoom ──────────────────────────────────────────────
 
-    const onMouseDown = useCallback((e: React.MouseEvent) => {
-      if (e.button !== 0) return;
-      dragging.current = true;
-      dragOrigin.current = {
-        x: e.clientX - panRef.current.x,
-        y: e.clientY - panRef.current.y,
-      };
+    const onPointerDown = useCallback((e: React.PointerEvent) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (pointers.current.size === 1) {
+        dragging.current = true;
+        dragOrigin.current = {
+          x: e.clientX - panRef.current.x,
+          y: e.clientY - panRef.current.y,
+        };
+      } else if (pointers.current.size === 2) {
+        dragging.current = false;
+        const [p1, p2] = [...pointers.current.values()];
+        const rect = containerRef.current?.getBoundingClientRect();
+        pinchStartDist.current = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        pinchStartZoom.current = zoomRef.current;
+        pinchStartPan.current = { ...panRef.current };
+        if (rect) {
+          pinchStartMid.current = {
+            x: (p1.x + p2.x) / 2 - rect.left - rect.width / 2,
+            y: (p1.y + p2.y) / 2 - rect.top - rect.height / 2,
+          };
+        }
+      }
     }, []);
 
-    const onMouseMove = useCallback(
-      (e: React.MouseEvent) => {
+    const onPointerMove = useCallback(
+      (e: React.PointerEvent) => {
         if (draggingNodeId.current) {
           const mouse = toSceneCoords(e.clientX, e.clientY);
           const dx = mouse.x - dragMouseOrigin.current.x;
@@ -676,6 +705,29 @@ export const GraphCanvas = forwardRef<GraphCanvasHandle, Props>(
           setNodes((prev) =>
             prev.map((n) => (n.id === id ? { ...n, x: newX, y: newY } : n)),
           );
+          return;
+        }
+
+        if (!pointers.current.has(e.pointerId)) return;
+        pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (pointers.current.size >= 2 && pinchStartDist.current > 0) {
+          const [p1, p2] = [...pointers.current.values()];
+          const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+          const factor = dist / pinchStartDist.current;
+          const newZoom = Math.min(
+            Math.max(pinchStartZoom.current * factor, 0.08),
+            5,
+          );
+          const ratio = newZoom / pinchStartZoom.current;
+          const mid = pinchStartMid.current;
+          panRef.current = {
+            x: mid.x + (pinchStartPan.current.x - mid.x) * ratio,
+            y: mid.y + (pinchStartPan.current.y - mid.y) * ratio,
+          };
+          zoomRef.current = newZoom;
+          setPan({ ...panRef.current });
+          setZoom(newZoom);
         } else if (dragging.current) {
           panRef.current = {
             x: e.clientX - dragOrigin.current.x,
@@ -687,16 +739,28 @@ export const GraphCanvas = forwardRef<GraphCanvasHandle, Props>(
       [toSceneCoords],
     );
 
-    const onMouseUp = useCallback(() => {
-      dragging.current = false;
+    const onPointerUp = useCallback((e: React.PointerEvent) => {
+      pointers.current.delete(e.pointerId);
+      if (pointers.current.size < 2) pinchStartDist.current = 0;
+
+      if (pointers.current.size === 0) {
+        dragging.current = false;
+      } else if (pointers.current.size === 1) {
+        // Resume single-pointer pan from the remaining finger's position.
+        const [remaining] = [...pointers.current.values()];
+        dragging.current = true;
+        dragOrigin.current = {
+          x: remaining.x - panRef.current.x,
+          y: remaining.y - panRef.current.y,
+        };
+      }
       draggingNodeId.current = null;
     }, []);
 
     // ── Node drag start ───────────────────────────────────────────────────────
 
     const handleNodeDragStart = useCallback(
-      (id: string, e: React.MouseEvent) => {
-        if (e.button !== 0) return;
+      (id: string, e: React.PointerEvent) => {
         const node = nodesRef.current.find((n) => n.id === id);
         if (!node) return;
         draggingNodeId.current = id;
@@ -817,14 +881,13 @@ export const GraphCanvas = forwardRef<GraphCanvasHandle, Props>(
           overflow: "hidden",
           position: "relative",
           cursor: dragging.current ? "grabbing" : "grab",
+          touchAction: "none",
         }}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={() => {
-          onMouseUp();
-          setHoveredNodeId(null);
-        }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onMouseLeave={() => setHoveredNodeId(null)}
       >
         <div
           style={{

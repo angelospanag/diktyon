@@ -1,7 +1,15 @@
+"use client";
+
 import { Building2, ShieldAlert, User } from "lucide-react";
 import type React from "react";
+import { useState } from "react";
+import { useIsMobile } from "@/lib/graph";
 
 export function GraphLegend() {
+  const isMobile = useIsMobile();
+  const [openOverride, setOpenOverride] = useState<boolean | null>(null);
+  const open = openOverride ?? !isMobile;
+
   return (
     <div
       className="absolute bottom-5 left-5 z-20 select-none"
@@ -10,97 +18,110 @@ export function GraphLegend() {
         border: "1px solid #d4c4a8",
         borderRadius: 4,
         boxShadow: "2px 4px 16px rgba(40,20,0,0.22)",
-        padding: "10px 14px",
+        padding: open ? "10px 14px" : "7px 12px",
         fontFamily: "Inter,system-ui,sans-serif",
         transform: "rotate(-0.8deg)",
-        width: 180,
+        width: open ? "min(180px, calc(50vw - 30px))" : "auto",
+        maxHeight: "45vh",
+        overflowY: "auto",
       }}
     >
-      <p
+      <button
+        type="button"
+        onClick={() => setOpenOverride(!open)}
         style={{
+          display: "block",
+          width: "100%",
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          textAlign: "left",
           fontSize: 10,
           fontWeight: 700,
           letterSpacing: "0.16em",
           textTransform: "uppercase",
           color: "#1a1a2e",
           opacity: 0.55,
-          marginBottom: 9,
+          marginBottom: open ? 9 : 0,
         }}
       >
-        Legend
-      </p>
+        Legend {open ? "▾" : "▸"}
+      </button>
 
-      <Section label="Nodes" />
-      <NodeRow
-        bg="linear-gradient(155deg,#ffffff 0%,#f5ede0 100%)"
-        border="1.5px solid #c8b898"
-        icon={<Building2 size={11} strokeWidth={1.8} color="#1a1a2e" />}
-        label="Company"
-      />
-      <NodeRow
-        bg="linear-gradient(135deg,#f4f7ff 0%,#dce8f5 100%)"
-        border="1.5px solid #8fa8cc"
-        icon={<User size={11} strokeWidth={1.8} color="#2a4a7f" />}
-        label="Officer"
-      />
-      <NodeRow
-        bg="linear-gradient(155deg,#fff8f8 0%,#fde8e8 100%)"
-        border="1.5px dashed #d88888"
-        icon={<ShieldAlert size={11} strokeWidth={1.8} color="#8a1a1a" />}
-        label="PSC / Beneficial owner"
-      />
+      <div data-legend-body style={{ display: open ? "block" : "none" }}>
+        <Section label="Nodes" />
+        <NodeRow
+          bg="linear-gradient(155deg,#ffffff 0%,#f5ede0 100%)"
+          border="1.5px solid #c8b898"
+          icon={<Building2 size={11} strokeWidth={1.8} color="#1a1a2e" />}
+          label="Company"
+        />
+        <NodeRow
+          bg="linear-gradient(135deg,#f4f7ff 0%,#dce8f5 100%)"
+          border="1.5px solid #8fa8cc"
+          icon={<User size={11} strokeWidth={1.8} color="#2a4a7f" />}
+          label="Officer"
+        />
+        <NodeRow
+          bg="linear-gradient(155deg,#fff8f8 0%,#fde8e8 100%)"
+          border="1.5px dashed #d88888"
+          icon={<ShieldAlert size={11} strokeWidth={1.8} color="#8a1a1a" />}
+          label="PSC / Beneficial owner"
+        />
 
-      <div style={{ height: 1, background: "#e8dece", margin: "9px 0" }} />
+        <div style={{ height: 1, background: "#e8dece", margin: "9px 0" }} />
 
-      <Section label="Edges" />
-      <EdgeRow dashed={false} label="Officer of company" />
-      <EdgeRow dashed label="Controls (PSC)" />
+        <Section label="Edges" />
+        <EdgeRow dashed={false} label="Officer of company" />
+        <EdgeRow dashed label="Controls (PSC)" />
 
-      <div style={{ height: 1, background: "#e8dece", margin: "9px 0" }} />
+        <div style={{ height: 1, background: "#e8dece", margin: "9px 0" }} />
 
-      <Section label="Flags" />
-      <p
-        style={{
-          fontSize: 10.5,
-          color: "#1a1a2e",
-          opacity: 0.7,
-          lineHeight: 1.4,
-          marginBottom: 0,
-        }}
-      >
-        ⚠ on a company = overdue filing, insolvency history, or registered
-        charges.
-      </p>
+        <Section label="Flags" />
+        <p
+          style={{
+            fontSize: 10.5,
+            color: "#1a1a2e",
+            opacity: 0.7,
+            lineHeight: 1.4,
+            marginBottom: 0,
+          }}
+        >
+          ⚠ on a company = overdue filing, insolvency history, or registered
+          charges.
+        </p>
 
-      <div style={{ height: 1, background: "#e8dece", margin: "9px 0" }} />
+        <div style={{ height: 1, background: "#e8dece", margin: "9px 0" }} />
 
-      <Section label="History" />
-      <p
-        style={{
-          fontSize: 10.5,
-          color: "#1a1a2e",
-          opacity: 0.7,
-          lineHeight: 1.4,
-          marginBottom: 0,
-        }}
-      >
-        Greyed/stamped = resigned or ceased.
-        <span data-print-hide>
-          {" "}
-          Toggle <strong>FORMER</strong> in the header to show them.
-        </span>
-      </p>
+        <Section label="History" />
+        <p
+          style={{
+            fontSize: 10.5,
+            color: "#1a1a2e",
+            opacity: 0.7,
+            lineHeight: 1.4,
+            marginBottom: 0,
+          }}
+        >
+          Greyed/stamped = resigned or ceased.
+          <span data-print-hide>
+            {" "}
+            Toggle <strong>FORMER</strong> in the header to show them.
+          </span>
+        </p>
 
-      <div
-        data-print-hide
-        style={{ height: 1, background: "#e8dece", margin: "9px 0" }}
-      />
+        <div
+          data-print-hide
+          style={{ height: 1, background: "#e8dece", margin: "9px 0" }}
+        />
 
-      <div data-print-hide>
-        <Section label="Controls" />
-        <ControlRow hint="scroll" label="zoom" />
-        <ControlRow hint="drag" label="pan board" />
-        <ControlRow hint="drag card" label="repin" />
+        <div data-print-hide>
+          <Section label="Controls" />
+          <ControlRow hint="scroll / pinch" label="zoom" />
+          <ControlRow hint="drag" label="pan board" />
+          <ControlRow hint="drag card" label="repin" />
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,10 @@
+"use client";
+
 import { Building2, ShieldAlert, User } from "lucide-react";
 import type { ReactNode } from "react";
+import { useState } from "react";
 import type { Node as GraphNode } from "@/client/types.gen";
-import { isHistorical } from "@/lib/graph";
+import { isHistorical, useIsMobile } from "@/lib/graph";
 
 interface Props {
   nodes: GraphNode[];
@@ -16,6 +19,10 @@ const SECTION_BORDER: Record<GraphNode["type"], string> = {
 };
 
 export function GraphRoster({ nodes, onHoverNode, onClickNode }: Props) {
+  const isMobile = useIsMobile();
+  const [openOverride, setOpenOverride] = useState<boolean | null>(null);
+  const open = openOverride ?? !isMobile;
+
   if (nodes.length === 0) return null;
 
   const companies = nodes
@@ -37,48 +44,59 @@ export function GraphRoster({ nodes, onHoverNode, onClickNode }: Props) {
         border: "1px solid #d4c4a8",
         borderRadius: 4,
         boxShadow: "2px 4px 16px rgba(40,20,0,0.22)",
-        padding: "10px 14px",
+        padding: open ? "10px 14px" : "7px 12px",
         fontFamily: "Inter, system-ui, sans-serif",
         transform: "rotate(0.4deg)",
-        width: 200,
+        width: open ? "min(200px, calc(50vw - 30px))" : "auto",
         maxHeight: "55vh",
       }}
     >
-      <p
+      <button
+        type="button"
+        onClick={() => setOpenOverride(!open)}
         style={{
+          display: "block",
+          width: "100%",
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          textAlign: "left",
           fontSize: 10,
           fontWeight: 700,
           letterSpacing: "0.16em",
           textTransform: "uppercase",
           color: "#1a1a2e",
           opacity: 0.55,
-          marginBottom: 9,
+          marginBottom: open ? 9 : 0,
         }}
       >
-        Board · {nodes.length}
-      </p>
+        Board · {nodes.length} {open ? "▾" : "▸"}
+      </button>
 
-      <RosterSection
-        label="Companies"
-        icon={<Building2 size={10} strokeWidth={1.8} color="#8a6500" />}
-        items={companies}
-        onHoverNode={onHoverNode}
-        onClickNode={onClickNode}
-      />
-      <RosterSection
-        label="Officers"
-        icon={<User size={10} strokeWidth={1.8} color="#1a4a8a" />}
-        items={officers}
-        onHoverNode={onHoverNode}
-        onClickNode={onClickNode}
-      />
-      <RosterSection
-        label="PSCs"
-        icon={<ShieldAlert size={10} strokeWidth={1.8} color="#8a1a1a" />}
-        items={pscs}
-        onHoverNode={onHoverNode}
-        onClickNode={onClickNode}
-      />
+      <div style={{ display: open ? "block" : "none" }}>
+        <RosterSection
+          label="Companies"
+          icon={<Building2 size={10} strokeWidth={1.8} color="#8a6500" />}
+          items={companies}
+          onHoverNode={onHoverNode}
+          onClickNode={onClickNode}
+        />
+        <RosterSection
+          label="Officers"
+          icon={<User size={10} strokeWidth={1.8} color="#1a4a8a" />}
+          items={officers}
+          onHoverNode={onHoverNode}
+          onClickNode={onClickNode}
+        />
+        <RosterSection
+          label="PSCs"
+          icon={<ShieldAlert size={10} strokeWidth={1.8} color="#8a1a1a" />}
+          items={pscs}
+          onHoverNode={onHoverNode}
+          onClickNode={onClickNode}
+        />
+      </div>
     </div>
   );
 }

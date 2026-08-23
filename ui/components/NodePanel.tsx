@@ -1,6 +1,14 @@
+"use client";
+
 import type { Node as GraphNode } from "@/client/types.gen";
 import { Pushpin } from "@/components/Pushpin";
-import { chLink, distressFlags, PIN_COLOR, tiltAngle } from "@/lib/graph";
+import {
+  chLink,
+  distressFlags,
+  PIN_COLOR,
+  tiltAngle,
+  useIsMobile,
+} from "@/lib/graph";
 
 interface Props {
   node: GraphNode;
@@ -28,12 +36,20 @@ export function NodePanel({ node, isExpanding, onExpand, onClose }: Props) {
     (node.type === "company" && !!node.meta.company_number) ||
     (node.type === "officer" && !!node.meta.officer_id);
 
-  const tilt = tiltAngle(node.id);
+  const isMobile = useIsMobile();
+  // The pinned-photo tilt widens the on-screen bounding box, which runs the
+  // panel off-screen on a narrow phone when it's anchored near the edge —
+  // keep it axis-aligned there instead of trying to compensate the offset.
+  const tilt = isMobile ? 0 : tiltAngle(node.id);
 
   return (
     <div
-      className="relative w-60"
-      style={{ transform: `rotate(${tilt}deg)`, transformOrigin: "top center" }}
+      className="relative"
+      style={{
+        width: isMobile ? "min(240px, calc(100vw - 24px))" : 240,
+        transform: `rotate(${tilt}deg)`,
+        transformOrigin: "top center",
+      }}
     >
       {/* Pushpin */}
       <div className="absolute -top-[22px] left-1/2 z-10 -translate-x-1/2">

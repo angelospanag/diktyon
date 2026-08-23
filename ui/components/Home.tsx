@@ -143,7 +143,7 @@ export function Home({ rootCompany }: HomeProps) {
       {/* Header */}
       <header
         data-print-hide
-        className="relative z-30 flex items-center gap-6 px-6 py-3 shadow-md"
+        className="relative z-30 flex flex-wrap items-center gap-3 px-3 py-2 shadow-md sm:gap-6 sm:px-6 sm:py-3"
         style={{
           background: "linear-gradient(180deg, #faf6f0 0%, #f2ebe0 100%)",
           borderBottom: "1px solid #d4c4a8",
@@ -151,7 +151,7 @@ export function Home({ rootCompany }: HomeProps) {
       >
         <a href="/" className="shrink-0 no-underline">
           <div
-            className="text-2xl font-black tracking-tighter text-[--color-string]"
+            className="text-xl font-black tracking-tighter text-[--color-string] sm:text-2xl"
             style={{
               fontFamily: "var(--font-display)",
               letterSpacing: "-0.03em",
@@ -160,7 +160,7 @@ export function Home({ rootCompany }: HomeProps) {
             DIKTYON
           </div>
           <div
-            className="text-[10px] font-semibold tracking-widest text-stone-400 uppercase"
+            className="hidden text-[10px] font-semibold tracking-widest text-stone-400 uppercase sm:block"
             style={{
               fontFamily: "var(--font-display)",
               letterSpacing: "0.12em",
@@ -170,9 +170,11 @@ export function Home({ rootCompany }: HomeProps) {
           </div>
         </a>
 
-        <div className="h-8 w-px bg-stone-300" />
+        <div className="hidden h-8 w-px bg-stone-300 sm:block" />
 
-        <SearchBox onSelect={handleSelect} />
+        <div className="order-3 w-full min-w-0 sm:order-none sm:w-auto sm:flex-1">
+          <SearchBox onSelect={handleSelect} />
+        </div>
 
         {rootGraph && (
           <div className="ml-auto flex items-center gap-2">
@@ -184,7 +186,7 @@ export function Home({ rootCompany }: HomeProps) {
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
-                padding: "6px 12px",
+                padding: "6px 10px",
                 background: showResigned ? "#ede3d6" : "transparent",
                 border: "1px solid #d4c4a8",
                 borderRadius: 5,
@@ -194,9 +196,13 @@ export function Home({ rootCompany }: HomeProps) {
                 fontWeight: 700,
                 letterSpacing: "0.06em",
                 color: "#5a4a38",
+                whiteSpace: "nowrap",
               }}
             >
-              🕵️ {showResigned ? "FORMER: ON" : "FORMER: OFF"}
+              🕵️{" "}
+              <span className="hidden sm:inline">
+                {showResigned ? "FORMER: ON" : "FORMER: OFF"}
+              </span>
             </button>
             <button
               type="button"
@@ -206,7 +212,7 @@ export function Home({ rootCompany }: HomeProps) {
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
-                padding: "6px 12px",
+                padding: "6px 10px",
                 background: "transparent",
                 border: "1px solid #d4c4a8",
                 borderRadius: 5,
@@ -239,7 +245,7 @@ export function Home({ rootCompany }: HomeProps) {
                 <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
                 <rect x={6} y={14} width={12} height={8} />
               </svg>
-              PRINT
+              <span className="hidden sm:inline">PRINT</span>
             </button>
           </div>
         )}
@@ -373,7 +379,10 @@ export function Home({ rootCompany }: HomeProps) {
         />
 
         {selected && (
-          <div data-print-hide className="absolute right-6 top-6 z-20">
+          <div
+            data-print-hide
+            className="absolute right-3 top-3 z-20 sm:right-6 sm:top-6"
+          >
             <NodePanel
               node={selected}
               isExpanding={expanding}
@@ -387,7 +396,7 @@ export function Home({ rootCompany }: HomeProps) {
       {/* Footer */}
       <footer
         data-print-hide
-        className="shrink-0 flex items-center justify-center gap-3 px-6 py-2 text-xs"
+        className="shrink-0 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-3 py-2 text-center text-xs sm:px-6"
         style={{
           background: "linear-gradient(180deg, #f2ebe0 0%, #ede3d6 100%)",
           borderTop: "1px solid #d4c4a8",
