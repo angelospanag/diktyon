@@ -21,7 +21,7 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/mod v0.40.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/telemetry v0.0.0-20260820143203-7221e139e8d6 // indirect
+	golang.org/x/telemetry v0.0.0-20260821201142-16c97dc83219 // indirect
 	golang.org/x/tools v0.49.0 // indirect
 	golang.org/x/vuln v1.7.0 // indirect
 )
