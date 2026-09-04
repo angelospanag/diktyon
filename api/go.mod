@@ -1,6 +1,6 @@
 module github.com/angelospanag/diktyon
 
-go 1.27.0
+go 1.27.1
 
 require (
 	github.com/andybalholm/brotli v1.2.3
