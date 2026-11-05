@@ -32,7 +32,7 @@ All company data is sourced from the [Companies House public API](https://develo
 | Directory     | Purpose                               | Technologies                                                                                 |
 | ------------- | ------------------------------------- | -------------------------------------------------------------------------------------------- |
 | `api/`        | Companies House proxy + graph builder | Go 1.27, Huma v2, chi, go-redis                                                              |
-| `ui/`         | Interactive corkboard graph           | Next.js 16, React 19, TypeScript 5, Tailwind CSS v4, d3-force v3, TanStack Query v5, hey-api |
+| `ui/`         | Interactive corkboard graph           | Next.js 16, React 19, TypeScript 7, Tailwind CSS v4, d3-force v3, TanStack Query v5, hey-api |
 | `compose.yml` | Full-stack orchestration              | Podman Compose, Redis 8                                                                      |
 
 ## Getting Started
