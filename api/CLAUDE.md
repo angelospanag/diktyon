@@ -134,3 +134,9 @@ CI runs tests with a live Redis container (`REDIS_URL=redis://localhost:6379`).
 3. Add any required API key env vars to `internal/config/config.go`.
 
 Huma generates OpenAPI docs automatically at `/docs` (Swagger UI).
+
+## Container image
+
+`Containerfile` builds a static binary on `golang:1.27.3-trixie` and ships it on
+`gcr.io/distroless/static-debian13:nonroot`, so the API runs as uid 65532 on port 8080. Go and golangci-lint versions
+are pinned in `mise.toml`.

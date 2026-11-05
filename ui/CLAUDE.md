@@ -8,7 +8,7 @@ Next.js 16 App Router SPA. Renders the corporate network graph as an interactive
 
 | Concern | Library |
 |---|---|
-| Build | Next.js 16 (Turbopack) + TypeScript 5 |
+| Build | Next.js 16 (Turbopack) + TypeScript 7 |
 | UI framework | React 19 |
 | Styling | Tailwind CSS v4 |
 | Routing | App Router — `useSearchParams` + `useRouter` from `next/navigation` |
@@ -101,11 +101,14 @@ setHoveredNode(id: string | null)   // highlight a node from outside the canvas 
 
 ```bash
 cd ui
-bun install       # first time only
-bun dev           # http://localhost:3000
+mise install      # first time only: pinned tools
+mise run install  # first time only: dependencies
+mise run dev      # http://localhost:3000
 ```
 
 The Go API must be running on `:8080`.
+
+The container image (`Containerfile`) runs as non-root (uid 65532) on port 3000. Its app files are owned by that uid so Next can write `.next/cache`.
 
 ## Common tasks
 

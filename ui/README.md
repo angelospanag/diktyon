@@ -21,7 +21,7 @@ Next.js 16 frontend for Diktyon. Renders UK corporate network graphs as an inter
 
 ## Tech Stack
 
-Next.js 16 • React 19 • TypeScript 5 • Tailwind CSS v4 • d3-force v3 • TanStack Query v5 • hey-api • bun
+Next.js 16 • React 19 • TypeScript 7 • Tailwind CSS v4 • d3-force v3 • TanStack Query v5 • hey-api • bun
 
 ## Project Structure
 
@@ -51,7 +51,7 @@ ui/
 
 ## Getting Started
 
-Requires [bun](https://bun.sh/) and the Go API running on `:8080` (see `../api`).
+Requires [mise](https://mise.jdx.dev), which installs the pinned Bun, and the Go API running on `:8080` (see `../api`). The container image runs as non-root (uid 65532) on port 3000.
 
 ```bash
 # macOS / Linux

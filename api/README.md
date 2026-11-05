@@ -84,3 +84,7 @@ go test ./...
 ```
 
 CI runs tests with a live Redis container. See `.github/workflows/` at the repo root.
+
+## Container image
+
+The image is built on `gcr.io/distroless/static-debian13:nonroot`, so the API runs as uid 65532 on port 8080.

@@ -29,7 +29,7 @@ services:
       - backend
 
   redis:
-    image: redis:8.10.0-alpine
+    image: redis:8.10.3-trixie
     restart: unless-stopped
     volumes:
       - redis_data:/data
