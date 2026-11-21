@@ -5,6 +5,7 @@
 - [Diktyon](#diktyon)
   - [Data \& Privacy](#data--privacy)
   - [Features](#features)
+  - [Screenshots](#screenshots)
   - [Stack](#stack)
   - [Getting Started](#getting-started)
   - [Development](#development)
@@ -26,6 +27,19 @@ All company data is sourced from the [Companies House public API](https://develo
 - Rate-limited Companies House client (token bucket, 600 req / 5 min)
 - OpenAPI spec auto-generated from Go handler types via [Huma](https://huma.rocks); TypeScript client generated from the spec via [hey-api](https://heyapi.dev)
 - Experimental support for GEMI (Greece General Commercial Registry) — opt-in via `GEMI_API_KEY`
+
+## Screenshots
+
+![Waterstones Booksellers on the corkboard — officers, PSC and parent company](docs/screenshots/03-company-graph.jpg)
+
+| | |
+| --- | --- |
+| ![Landing page with example companies](docs/screenshots/01-home.jpg) | ![Company search autocomplete](docs/screenshots/02-search.jpg) |
+| **Start** — search or pick an example | **Search** — live autocomplete over Companies House |
+| ![Officer detail panel](docs/screenshots/04-node-details.jpg) | ![Officer expanded into their other companies](docs/screenshots/05-expanded-network.jpg) |
+| **Inspect** — click any card for details | **Expand** — follow an officer to all their companies |
+| ![Marks and Spencer with former officers shown](docs/screenshots/06-former-officers.jpg) | |
+| **History** — toggle FORMER to reveal resigned officers | |
 
 ## Stack
 
