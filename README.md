@@ -38,8 +38,8 @@ All company data is sourced from the [Companies House public API](https://develo
 | **Start** — search or pick an example | **Search** — live autocomplete over Companies House |
 | ![Officer detail panel](docs/screenshots/04-node-details.jpg) | ![Officer expanded into their other companies](docs/screenshots/05-expanded-network.jpg) |
 | **Inspect** — click any card for details | **Expand** — follow an officer to all their companies |
-| ![Marks and Spencer with former officers shown](docs/screenshots/06-former-officers.jpg) | |
-| **History** — toggle FORMER to reveal resigned officers | |
+| ![Marks and Spencer with former officers shown](docs/screenshots/06-former-officers.jpg) | ![Hovering a company highlights its direct connections](docs/screenshots/07-hover-highlight.jpg) |
+| **History** — toggle FORMER to reveal resigned officers | **Focus** — hover any entity to isolate its connections |
 
 ## Stack
 
